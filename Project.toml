@@ -1,0 +1,7 @@
+name = "Blake3Hash"
+uuid = "8f478455-a32d-4928-b0e4-72b19a7d5574"
+authors = ["Joshua Gentry <pixel@deathbysoftware.com>"]
+version = "0.1.0"
+
+[compat]
+julia = "1.5, 2"
