@@ -19,33 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+using Pkg
+using PkgBenchmark
 
-using Test
-using JSON
-using Base.Iterators
-
-const DATA    = JSON.parsefile("$(@__DIR__)/test_vectors.json")
-const KEY     = Vector{UInt8}(DATA["key"])
-const CONTEXT = DATA["context_string"]
-const CASES   = DATA["cases"]
-
-struct Case
-    input::Vector{UInt8}
-    hash::Vector{UInt8}
-    keyed::Vector{UInt8}
-    derive::Vector{UInt8}
-    Case(case::Dict{String, Any}) = new(
-        [x for x = take(cycle(UInt8(0):UInt8(250)), case["input_len"]) ],
-        hex2bytes(case["hash"]),
-        hex2bytes(case["keyed_hash"]),
-        hex2bytes(case["derive_key"])
-    )
-end
-
-@testset "Reference Implmentation" begin
-    include("test_ref.jl")
-end
-
-@testset "StaticArrays Implmentation" begin
-    include("test_w_static_arrays.jl")
-end
+Pkg.activate(pwd())
+c = BenchmarkConfig(juliacmd=`julia -O3`)
+r = benchmarkpkg(pwd(), c)
+export_markdown("performance_test.md", r)

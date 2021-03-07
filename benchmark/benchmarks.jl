@@ -19,33 +19,45 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+using BenchmarkTools
 
-using Test
-using JSON
-using Base.Iterators
+using SHA
+using Blake3Hash
 
-const DATA    = JSON.parsefile("$(@__DIR__)/test_vectors.json")
-const KEY     = Vector{UInt8}(DATA["key"])
-const CONTEXT = DATA["context_string"]
-const CASES   = DATA["cases"]
+const SUITE     = BenchmarkGroup()
+const DATA_SIZE = 2*8192
 
-struct Case
-    input::Vector{UInt8}
-    hash::Vector{UInt8}
-    keyed::Vector{UInt8}
-    derive::Vector{UInt8}
-    Case(case::Dict{String, Any}) = new(
-        [x for x = take(cycle(UInt8(0):UInt8(250)), case["input_len"]) ],
-        hex2bytes(case["hash"]),
-        hex2bytes(case["keyed_hash"]),
-        hex2bytes(case["derive_key"])
-    )
+SUITE["blake3"] = BenchmarkGroup()
+
+SUITE["blake3"]["RefImpl"] = @benchmarkable begin
+    Blake3Hash.RefImpl.update!(h, d)
+    Blake3Hash.RefImpl.digest(h)
+end setup = begin
+    h = Blake3Hash.RefImpl.Hasher()
+    d = rand(UInt8, DATA_SIZE)
 end
 
-@testset "Reference Implmentation" begin
-    include("test_ref.jl")
+SUITE["blake3"]["SAImpl"] = @benchmarkable begin
+    Blake3Hash.SAImpl.update!(h, d)
+    Blake3Hash.SAImpl.digest(h)
+end setup = begin
+    h = Blake3Hash.SAImpl.Hasher()
+    d = rand(UInt8, DATA_SIZE)
 end
 
-@testset "StaticArrays Implmentation" begin
-    include("test_w_static_arrays.jl")
+SUITE["ref"] = BenchmarkGroup()
+SUITE["ref"]["sha2_256"] = @benchmarkable begin
+    SHA.update!(c, d)
+    SHA.digest!(c)
+end setup = begin
+    c = SHA2_256_CTX()
+    d = rand(UInt8, DATA_SIZE)
+end
+
+SUITE["ref"]["sha3_256"] = @benchmarkable begin
+    SHA.update!(c, d)
+    SHA.digest!(c)
+end setup = begin
+    c = SHA3_256_CTX()
+    d = rand(UInt8, DATA_SIZE)
 end

@@ -23,8 +23,9 @@
 module Blake3Hash
 
 include("ref.jl")
+include("sa_impl/_module.jl")
 
-import .Blake3Ref: Hasher, update!, digest
+import .SAImpl: Hasher, update!, digest
 
 export Hasher, update!, digest
 

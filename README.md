@@ -6,11 +6,12 @@ https://github.com/BLAKE3-team/BLAKE3 for more information.
 
 ## Versions
 
-* 0.0.1 - Pretty much a straight copy of the BLAKE3 reference implmentation.  There has been no attempt to optimze the code.  This implementation is complete and passes the tests provide by the BLAKE3 team, so it is usable.
+* 0.1.0 - Pretty much a straight copy of the BLAKE3 reference implmentation.  There has been no attempt to optimze the code.  This implementation is complete and passes the tests provide by the BLAKE3 team, so it is usable.
+* 0.2.0 - Extensive use of SVector objects have been utilized to make the memory allocations constant.  Performance is now reasonable but can still be improved.
 
 ## Next Steps
 
-Memory allocations must be reduced, the number of allocations are pretty high at the moment.
+The code needs to be updated to better utilizate of the various SIMD instructions.  Multi-threading can also be implmented for better throughput when hashing large amounts of data.
 
 ## Usage
 

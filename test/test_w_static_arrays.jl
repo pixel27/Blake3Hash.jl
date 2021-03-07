@@ -25,11 +25,11 @@ using Blake3Hash
     @testset "Length: ($(test["input_len"]))" for test in CASES
         local case = Case(test)
 
-        local hasher = Blake3Hash.RefImpl.Hasher()
+        local hasher = Blake3Hash.SAImpl.Hasher()
         local result = Vector{UInt8}(undef, length(case.hash))
 
-        Blake3Hash.RefImpl.update!(hasher, case.input)
-        Blake3Hash.RefImpl.digest(hasher, result)
+        Blake3Hash.SAImpl.update!(hasher, case.input)
+        Blake3Hash.SAImpl.digest(hasher, result)
 
         @test case.hash == result
     end
@@ -39,11 +39,11 @@ end
     @testset "Length: ($(test["input_len"]))" for test in CASES
         local case = Case(test)
 
-        local hasher = Blake3Hash.RefImpl.Hasher(KEY)
+        local hasher = Blake3Hash.SAImpl.Hasher(KEY)
         local result = Vector{UInt8}(undef, length(case.hash))
 
-        Blake3Hash.RefImpl.update!(hasher, case.input)
-        Blake3Hash.RefImpl.digest(hasher, result)
+        Blake3Hash.SAImpl.update!(hasher, case.input)
+        Blake3Hash.SAImpl.digest(hasher, result)
 
         @test case.keyed == result
     end
@@ -54,11 +54,11 @@ end
     @testset "Length: ($(test["input_len"]))" for test in CASES
         local case = Case(test)
 
-        local hasher = Blake3Hash.RefImpl.Hasher(CONTEXT)
+        local hasher = Blake3Hash.SAImpl.Hasher(CONTEXT)
         local result = Vector{UInt8}(undef, length(case.hash))
 
-        Blake3Hash.RefImpl.update!(hasher, case.input)
-        Blake3Hash.RefImpl.digest(hasher, result)
+        Blake3Hash.SAImpl.update!(hasher, case.input)
+        Blake3Hash.SAImpl.digest(hasher, result)
 
         @test case.derive == result
     end
@@ -68,11 +68,11 @@ end
     @testset "Length: ($(test["input_len"]))" for test in CASES
         local case = Case(test)
 
-        local hasher = Blake3Hash.RefImpl.Hasher()
+        local hasher = Blake3Hash.SAImpl.Hasher()
 
-        Blake3Hash.RefImpl.update!(hasher, case.input)
+        Blake3Hash.SAImpl.update!(hasher, case.input)
 
-        local result = Blake3Hash.RefImpl.digest(hasher)
+        local result = Blake3Hash.SAImpl.digest(hasher)
 
         @test case.hash[1:32] == result
     end
@@ -82,19 +82,19 @@ end
     @testset "Length: ($(test["input_len"]))" for test in CASES
         local case = Case(test)
 
-        local hasher = Blake3Hash.RefImpl.Hasher()
-        Blake3Hash.RefImpl.update!(hasher, case.input)
+        local hasher = Blake3Hash.SAImpl.Hasher()
+        Blake3Hash.SAImpl.update!(hasher, case.input)
 
-        @test Blake3Hash.RefImpl.digest(hasher, 1) == case.hash[1:1]
-        @test Blake3Hash.RefImpl.digest(hasher, 2) == case.hash[1:2]
-        @test Blake3Hash.RefImpl.digest(hasher, 3) == case.hash[1:3]
-        @test Blake3Hash.RefImpl.digest(hasher, 4) == case.hash[1:4]
+        @test Blake3Hash.SAImpl.digest(hasher, 1) == case.hash[1:1]
+        @test Blake3Hash.SAImpl.digest(hasher, 2) == case.hash[1:2]
+        @test Blake3Hash.SAImpl.digest(hasher, 3) == case.hash[1:3]
+        @test Blake3Hash.SAImpl.digest(hasher, 4) == case.hash[1:4]
 
-        @test Blake3Hash.RefImpl.digest(hasher, 30) == case.hash[1:30]
-        @test Blake3Hash.RefImpl.digest(hasher, 31) == case.hash[1:31]
-        @test Blake3Hash.RefImpl.digest(hasher, 32) == case.hash[1:32]
-        @test Blake3Hash.RefImpl.digest(hasher, 33) == case.hash[1:33]
-        @test Blake3Hash.RefImpl.digest(hasher, 34) == case.hash[1:34]
+        @test Blake3Hash.SAImpl.digest(hasher, 30) == case.hash[1:30]
+        @test Blake3Hash.SAImpl.digest(hasher, 31) == case.hash[1:31]
+        @test Blake3Hash.SAImpl.digest(hasher, 32) == case.hash[1:32]
+        @test Blake3Hash.SAImpl.digest(hasher, 33) == case.hash[1:33]
+        @test Blake3Hash.SAImpl.digest(hasher, 34) == case.hash[1:34]
     end
 end
 
@@ -102,18 +102,18 @@ end
     @testset "Length: ($(test["input_len"]))" for test in CASES
         local case = Case(test)
 
-        local hasher = Blake3Hash.RefImpl.Hasher()
+        local hasher = Blake3Hash.SAImpl.Hasher()
         local result = Vector{UInt8}(undef, length(case.hash))
 
         local data = case.input
 
         while length(data) > 0
             local take = min(rand(1:4), length(data))
-            Blake3Hash.RefImpl.update!(hasher, data[1:take])
+            Blake3Hash.SAImpl.update!(hasher, data[1:take])
             data = data[(take+1):end]
         end
 
-        Blake3Hash.RefImpl.digest(hasher, result)
+        Blake3Hash.SAImpl.digest(hasher, result)
 
         @test case.hash == result
     end

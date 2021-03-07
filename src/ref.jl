@@ -25,7 +25,7 @@ This is the reference implmentation of the BLAKE3 algorithm done in Julia.  No a
 been made to improve the performance it's primarly purpose is to be easy to read and used
 to debug/verify faster implmentations.
 """
-module Blake3Ref
+module RefImpl
 
 using Base.Iterators
 
@@ -227,7 +227,7 @@ function update(self::ChunkState, input::AbstractVector{UInt8})::Nothing
                 UInt32(BLOCK_LEN),
                 self.flags | start_flag(self)
             ))
-            self.blocks_compressed += 1
+            self.blocks_compressed += UInt8(1)
             self.block = zeros(UInt8, BLOCK_LEN)
             self.block_len = 0
         end
@@ -271,7 +271,7 @@ function parent_cv(
             key::AbstractVector{UInt32},
             flags::UInt32
         )::Vector{UInt32}
-    chaining_value(parent_output(left_child_cv, right_child_cv, key, flags))
+    return chaining_value(parent_output(left_child_cv, right_child_cv, key, flags))
 end
 
 mutable struct Hasher
