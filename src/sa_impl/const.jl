@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-const OUT_LEN = UInt(32)
-const KEY_LEN = UInt(32)
-const BLOCK_LEN = UInt(64)
-const CHUNK_LEN = UInt(1024)
+const OUT_LEN = 32
+const KEY_LEN = 32
+const BLOCK_LEN = 64
+const CHUNK_LEN = 1024
 
 const CHUNK_START = UInt32(1) << 0
 const CHUNK_END   = UInt32(1) << 1

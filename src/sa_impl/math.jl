@@ -21,11 +21,6 @@
 # SOFTWARE.
 using StaticArrays
 
-const IV = SVector(
-    UInt32(0x6A09E667), UInt32(0xBB67AE85), UInt32(0x3C6EF372), UInt32(0xA54FF53A),
-    UInt32(0x510E527F), UInt32(0x9B05688C), UInt32(0x1F83D9AB), UInt32(0x5BE0CD19)
-)
-
 function g_1_5_9_13(input::SVector{16, UInt32}, mx::UInt32, my::UInt32)::SVector{16, UInt32}
     local a = input[1]
     local b = input[5]

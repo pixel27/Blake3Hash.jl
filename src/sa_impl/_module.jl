@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 """
-This is the the BLAKE3 algorithm does in Julia with StaticVectors and updates to get the
+This is the the BLAKE3 algorithm done in Julia with StaticVectors and updates to get the
 memory allocations constant.  Memory usage is now constant at 512 bytes on a 64bit machine
 regardless of the amount of data being processed.
 """

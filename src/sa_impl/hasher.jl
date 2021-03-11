@@ -175,23 +175,17 @@ Hash more data.  This method can be called multiple times until all the data has
 hashed.
 """
 function update!(self::Hasher, input::AbstractVector{UInt8}, datalen=length(input))::Nothing
-    local data = view(input, 1:datalen)
+    local output = nothing
+    local offset = 1
 
-    while isempty(data) == false
-        # If the current chunk is complete, finalize it and reset the
-        # chunk state. More input is coming, so this chunk is not ROOT.
-        if len(self.chunk_state) == CHUNK_LEN
-            local chunk_cv     = chaining_value(output(self.chunk_state))
+    while offset <= datalen
+        offset, output = update(self.chunk_state, input, offset)
+        if output !== nothing
+            local chunk_cv     = chaining_value(output)
             local total_chunks = self.chunk_state.chunk_counter + 1
             add_chunk_chaining_value(self, chunk_cv, total_chunks)
             reset(self.chunk_state, self.key, total_chunks, self.flags)
         end
-
-        # Compress input bytes into the current chunk state.
-        local want = CHUNK_LEN - len(self.chunk_state)
-        local take = min(want, length(data))
-        update(self.chunk_state, view(data, 1:take))
-        data = view(data, (take+1):length(data))
     end
 end
 
@@ -210,7 +204,7 @@ function digest(self::Hasher, out_slice::AbstractArray{UInt8})::Nothing
     # Starting with the Output from the current chunk, compute all the
     # parent chaining values along the right edge of the tree, until we
     # have the root Output.
-    local out                    = output(self.chunk_state)
+    local out                    = complete(self.chunk_state)
     local parent_nodes_remaining = UInt(self.cv_stack_len)
 
     while parent_nodes_remaining > 0

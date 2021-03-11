@@ -118,3 +118,22 @@ end
         @test case.hash == result
     end
 end
+
+@testset "Hash - special sizes" begin
+    local case = Case(CASES[end])
+
+    local hasher = Blake3Hash.RefImpl.Hasher()
+    local result = Vector{UInt8}(undef, length(case.hash))
+
+    local data = case.input
+
+    for bytes in [32, 960, 32, 32, 32, 960, 960, 32, 32, 992, 32, 512, 512, 500, 524 ]
+        Blake3Hash.RefImpl.update!(hasher, data[1:bytes])
+        data = data[(bytes+1):end]
+    end
+    Blake3Hash.RefImpl.update!(hasher, data)
+
+    Blake3Hash.RefImpl.digest(hasher, result)
+
+    @test case.hash == result
+end

@@ -42,10 +42,10 @@ struct Case
     )
 end
 
-@testset "Reference Implmentation" begin
-    include("test_ref.jl")
-end
-
 @testset "StaticArrays Implmentation" begin
     include("test_w_static_arrays.jl")
+end
+
+@testset "Reference Implmentation" begin
+    include("test_ref.jl")
 end
