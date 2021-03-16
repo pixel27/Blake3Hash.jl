@@ -1,11 +1,13 @@
 name = "Blake3Hash"
 uuid = "8f478455-a32d-4928-b0e4-72b19a7d5574"
 authors = ["Joshua Gentry <pixel@deathbysoftware.com>"]
-version = "0.2.1"
+version = "0.3.0"
 
 [deps]
+SIMD = "fdea26ae-647d-5447-a871-4b548cad5224"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 julia = "1.5, 2"
 StaticArrays = "1.0, 2"
+SIMD = "3.2.1, 3.3"

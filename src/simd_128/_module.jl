@@ -19,43 +19,19 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+module Simd128
 
-using Test
-using JSON
 using Base.Iterators
+using StaticArrays
+using SIMD
 
-const DATA    = JSON.parsefile("$(@__DIR__)/test_vectors.json")
-const KEY     = Vector{UInt8}(DATA["key"])
-const CONTEXT = DATA["context_string"]
-const CASES   = DATA["cases"]
+include("const.jl")
+include("asm_2_llvm.jl")
+include("buffer.jl")
+include("compress_math.jl")
+include("compress_single.jl")
+include("output.jl")
+include("chunk.jl")
+include("context.jl")
 
-struct Case
-    input::Vector{UInt8}
-    hash::Vector{UInt8}
-    keyed::Vector{UInt8}
-    derive::Vector{UInt8}
-    Case(case::Dict{String, Any}) = new(
-        [x for x = take(cycle(UInt8(0):UInt8(250)), case["input_len"]) ],
-        hex2bytes(case["hash"]),
-        hex2bytes(case["keyed_hash"]),
-        hex2bytes(case["derive_key"])
-    )
-end
-
-include("stress.jl")
-
-@testset "SIMD128 Implmentation" begin
-    include("test_simd_128.jl")
-end
-
-@testset "StaticArrays Implmentation" begin
-    include("test_w_static_arrays.jl")
-end
-
-@testset "Reference Implmentation" begin
-    include("test_ref.jl")
-end
-
-@testset "Default Usage" begin
-    include("test_default.jl")
 end

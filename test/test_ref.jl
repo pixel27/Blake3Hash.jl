@@ -25,7 +25,7 @@ using Blake3Hash
     @testset "Length: ($(test["input_len"]))" for test in CASES
         local case = Case(test)
 
-        local hasher = Blake3Hash.RefImpl.Hasher()
+        local hasher = Blake3Hash.RefImpl.Blake3Ctx()
         local result = Vector{UInt8}(undef, length(case.hash))
 
         Blake3Hash.RefImpl.update!(hasher, case.input)
@@ -39,7 +39,7 @@ end
     @testset "Length: ($(test["input_len"]))" for test in CASES
         local case = Case(test)
 
-        local hasher = Blake3Hash.RefImpl.Hasher(KEY)
+        local hasher = Blake3Hash.RefImpl.Blake3Ctx(KEY)
         local result = Vector{UInt8}(undef, length(case.hash))
 
         Blake3Hash.RefImpl.update!(hasher, case.input)
@@ -54,7 +54,7 @@ end
     @testset "Length: ($(test["input_len"]))" for test in CASES
         local case = Case(test)
 
-        local hasher = Blake3Hash.RefImpl.Hasher(CONTEXT)
+        local hasher = Blake3Hash.RefImpl.Blake3Ctx(CONTEXT)
         local result = Vector{UInt8}(undef, length(case.hash))
 
         Blake3Hash.RefImpl.update!(hasher, case.input)
@@ -68,7 +68,7 @@ end
     @testset "Length: ($(test["input_len"]))" for test in CASES
         local case = Case(test)
 
-        local hasher = Blake3Hash.RefImpl.Hasher()
+        local hasher = Blake3Hash.RefImpl.Blake3Ctx()
 
         Blake3Hash.RefImpl.update!(hasher, case.input)
 
@@ -82,7 +82,7 @@ end
     @testset "Length: ($(test["input_len"]))" for test in CASES
         local case = Case(test)
 
-        local hasher = Blake3Hash.RefImpl.Hasher()
+        local hasher = Blake3Hash.RefImpl.Blake3Ctx()
         Blake3Hash.RefImpl.update!(hasher, case.input)
 
         @test Blake3Hash.RefImpl.digest(hasher, 1) == case.hash[1:1]
@@ -102,7 +102,7 @@ end
     @testset "Length: ($(test["input_len"]))" for test in CASES
         local case = Case(test)
 
-        local hasher = Blake3Hash.RefImpl.Hasher()
+        local hasher = Blake3Hash.RefImpl.Blake3Ctx()
         local result = Vector{UInt8}(undef, length(case.hash))
 
         local data = case.input
@@ -119,21 +119,19 @@ end
     end
 end
 
-@testset "Hash - special sizes" begin
-    local case = Case(CASES[end])
-
-    local hasher = Blake3Hash.RefImpl.Hasher()
-    local result = Vector{UInt8}(undef, length(case.hash))
-
-    local data = case.input
-
-    for bytes in [32, 960, 32, 32, 32, 960, 960, 32, 32, 992, 32, 512, 512, 500, 524 ]
-        Blake3Hash.RefImpl.update!(hasher, data[1:bytes])
-        data = data[(bytes+1):end]
-    end
+@testset "Hash - stress" begin
+    data   = rand(UInt8, TOTAL_SIZE)
+    hasher = Blake3Hash.RefImpl.Blake3Ctx()
     Blake3Hash.RefImpl.update!(hasher, data)
+    expected = Blake3Hash.RefImpl.digest(hasher)
 
-    Blake3Hash.RefImpl.digest(hasher, result)
+    for chunks in StressIter(data)
+        hasher = Blake3Hash.RefImpl.Blake3Ctx()
 
-    @test case.hash == result
+        for chunk in chunks
+            Blake3Hash.RefImpl.update!(hasher, chunk)
+        end
+
+        @test Blake3Hash.RefImpl.digest(hasher) == expected
+    end
 end

@@ -19,43 +19,27 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+using SIMD
 
-using Test
-using JSON
-using Base.Iterators
+const VECTOR = Vec{4, UInt32}
+const CHAINING = NTuple{2, VECTOR}
+const BLOCK    = NTuple{4, VECTOR}
+const CHUNK    = SVector{8, VECTOR}
 
-const DATA    = JSON.parsefile("$(@__DIR__)/test_vectors.json")
-const KEY     = Vector{UInt8}(DATA["key"])
-const CONTEXT = DATA["context_string"]
-const CASES   = DATA["cases"]
+const OUT_LEN = 32
+const KEY_LEN = 32
+const BLOCK_LEN = 64
+const CHUNK_LEN = 1024
 
-struct Case
-    input::Vector{UInt8}
-    hash::Vector{UInt8}
-    keyed::Vector{UInt8}
-    derive::Vector{UInt8}
-    Case(case::Dict{String, Any}) = new(
-        [x for x = take(cycle(UInt8(0):UInt8(250)), case["input_len"]) ],
-        hex2bytes(case["hash"]),
-        hex2bytes(case["keyed_hash"]),
-        hex2bytes(case["derive_key"])
-    )
-end
+const CHUNK_START = UInt32(1) << 0
+const CHUNK_END   = UInt32(1) << 1
+const PARENT      = UInt32(1) << 2
+const ROOT        = UInt32(1) << 3
+const KEYED_HASH  = UInt32(1) << 4
+const DERIVE_KEY_CONTEXT  = UInt32(1) << 5
+const DERIVE_KEY_MATERIAL = UInt32(1) << 6
 
-include("stress.jl")
-
-@testset "SIMD128 Implmentation" begin
-    include("test_simd_128.jl")
-end
-
-@testset "StaticArrays Implmentation" begin
-    include("test_w_static_arrays.jl")
-end
-
-@testset "Reference Implmentation" begin
-    include("test_ref.jl")
-end
-
-@testset "Default Usage" begin
-    include("test_default.jl")
-end
+const IV = SVector{8, UInt32}(
+    UInt32(0x6A09E667), UInt32(0xBB67AE85), UInt32(0x3C6EF372), UInt32(0xA54FF53A),
+    UInt32(0x510E527F), UInt32(0x9B05688C), UInt32(0x1F83D9AB), UInt32(0x5BE0CD19)
+)

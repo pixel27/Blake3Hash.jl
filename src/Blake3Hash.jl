@@ -22,11 +22,19 @@
 
 module Blake3Hash
 
+ENDIAN_BOM != 0x04030201 && throw(
+    "Sorry this package currently only works on little endian machines."
+)
+
 include("ref.jl")
 include("sa_impl/_module.jl")
+include("simd_128/_module.jl")
 
-import .SAImpl: Hasher, update!, digest
+using .Simd128
+const Blake3Ctx = Simd128.Blake3Ctx
+const update!   = Simd128.update!
+const digest    = Simd128.digest
 
-export Hasher, update!, digest
+export Blake3Ctx, update!, digest
 
 end # module

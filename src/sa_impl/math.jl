@@ -246,6 +246,14 @@ function compress(
             block_len::UInt32,
             flags::UInt32
         )::SVector{16, UInt32}
+    # @printf("CV1: 0x%08x 0x%08x 0x%08x 0x%08x\n", chaining_value[1], chaining_value[2], chaining_value[3], chaining_value[4])
+    # @printf("CV2: 0x%08x 0x%08x 0x%08x 0x%08x\n", chaining_value[5], chaining_value[6], chaining_value[7], chaining_value[8])
+    # @printf("BL1: 0x%08x 0x%08x 0x%08x 0x%08x\n", block[1], block[2], block[3], block[4])
+    # @printf("BL2: 0x%08x 0x%08x 0x%08x 0x%08x\n", block[5], block[6], block[7], block[8])
+    # @printf("BL3: 0x%08x 0x%08x 0x%08x 0x%08x\n", block[9], block[10], block[11], block[12])
+    # @printf("BL4: 0x%08x 0x%08x 0x%08x 0x%08x\n", block[13], block[14], block[15], block[16])
+    # @printf("block_len: %d counter: %d flags: %d\n", block_len, counter, flags)
+
     local state = SVector{16, UInt32}(
         chaining_value[1], chaining_value[2], chaining_value[3], chaining_value[4],
         chaining_value[5], chaining_value[6], chaining_value[7], chaining_value[8],

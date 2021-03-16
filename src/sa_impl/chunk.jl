@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 @inline function ltoh_array(block::AbstractVector{UInt32})::SVector{16, UInt32}
-    @inbounds return SVector{16, UInt32}(
+    return SVector{16, UInt32}(
         ltoh(block[1]),  ltoh(block[2]),  ltoh(block[3]),  ltoh(block[4]),
         ltoh(block[5]),  ltoh(block[6]),  ltoh(block[7]),  ltoh(block[8]),
         ltoh(block[9]),  ltoh(block[10]), ltoh(block[11]), ltoh(block[12]),
@@ -90,7 +90,7 @@ end
         )::Int
     bytes  = min(BLOCK_LEN - self.block_len, length(input) - offset + 1)
 
-    @inbounds copyto!(reinterpret(UInt8, self.block), self.block_len+1, input, offset, bytes)
+    copyto!(reinterpret(UInt8, self.block), self.block_len+1, input, offset, bytes)
 
     self.block_len += bytes
 

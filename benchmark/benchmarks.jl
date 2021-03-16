@@ -33,7 +33,7 @@ SUITE["blake3"]["RefImpl"] = @benchmarkable begin
     Blake3Hash.RefImpl.update!(h, d)
     Blake3Hash.RefImpl.digest(h)
 end setup = begin
-    h = Blake3Hash.RefImpl.Hasher()
+    h = Blake3Hash.RefImpl.Blake3Ctx()
     d = rand(UInt8, DATA_SIZE)
 end
 
@@ -41,7 +41,15 @@ SUITE["blake3"]["SAImpl"] = @benchmarkable begin
     Blake3Hash.SAImpl.update!(h, d)
     Blake3Hash.SAImpl.digest(h)
 end setup = begin
-    h = Blake3Hash.SAImpl.Hasher()
+    h = Blake3Hash.SAImpl.Blake3Ctx()
+    d = rand(UInt8, DATA_SIZE)
+end
+
+SUITE["blake3"]["Simd128"] = @benchmarkable begin
+    Blake3Hash.Simd128.update!(h, d)
+    Blake3Hash.Simd128.digest(h)
+end setup = begin
+    h = Blake3Hash.Simd128.Blake3Ctx()
     d = rand(UInt8, DATA_SIZE)
 end
 

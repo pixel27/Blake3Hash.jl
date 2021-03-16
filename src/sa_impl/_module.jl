@@ -34,6 +34,6 @@ include("const.jl")
 include("math.jl")
 include("output.jl")
 include("chunk.jl")
-include("hasher.jl")
+include("context.jl")
 
 end

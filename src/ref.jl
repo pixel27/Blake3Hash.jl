@@ -274,45 +274,45 @@ function parent_cv(
     return chaining_value(parent_output(left_child_cv, right_child_cv, key, flags))
 end
 
-mutable struct Hasher
+mutable struct Blake3Ctx
     chunk_state::ChunkState
     key::Vector{UInt32}
     cv_stack::Array{UInt32, 2}
     cv_stack_len::UInt8
     flags::UInt32
-    Hasher(key::Vector{UInt32}=IV, flags::UInt32=UInt32(0)) = new(
+    Blake3Ctx(key::Vector{UInt32}=IV, flags::UInt32=UInt32(0)) = new(
         ChunkState(key, UInt64(0), flags), key, Array{UInt32}(undef, 8, 54), 0, flags
     )
-    Hasher(key::Vector{UInt8}) = begin
+    Blake3Ctx(key::Vector{UInt8}) = begin
         local key_words = zeros(UInt32, 8)
         words_from_little_endian_bytes(key, key_words)
-        return Hasher(key_words, KEYED_HASH)
+        return Blake3Ctx(key_words, KEYED_HASH)
     end
-    Hasher(content::AbstractString) = begin
-        local context_hasher = Hasher(IV, DERIVE_KEY_CONTEXT)
+    Blake3Ctx(content::AbstractString) = begin
+        local context_hasher = Blake3Ctx(IV, DERIVE_KEY_CONTEXT)
         update!(context_hasher, Vector{UInt8}(content))
         local context_key = zeros(UInt8, KEY_LEN)
         digest(context_hasher, context_key)
         local context_key_words = zeros(UInt32, 8)
         words_from_little_endian_bytes(context_key, context_key_words)
-        return Hasher(context_key_words, DERIVE_KEY_MATERIAL)
+        return Blake3Ctx(context_key_words, DERIVE_KEY_MATERIAL)
     end
 end
 
-function push_stack(self::Hasher, cv::AbstractVector{UInt32})::Nothing
+function push_stack(self::Blake3Ctx, cv::AbstractVector{UInt32})::Nothing
     self.cv_stack_len += 1
     self.cv_stack[:, self.cv_stack_len] .= cv
     nothing
 end
 
-function pop_stack(self::Hasher)::Vector{UInt32}
+function pop_stack(self::Blake3Ctx)::Vector{UInt32}
     self.cv_stack_len -= 1
     return self.cv_stack[:, self.cv_stack_len+1]
 end
 
 # Section 5.1.2 of the BLAKE3 spec explains this algorithm in more detail.
 function add_chunk_chaining_value(
-            self::Hasher,
+            self::Blake3Ctx,
             new_cv::AbstractVector{UInt32},
             total_chunks::UInt64
         )::Nothing
@@ -332,12 +332,12 @@ function add_chunk_chaining_value(
 end
 
 """
-    update!(self::Hasher, input::AbstractVector{UInt8}, datalen=length(input))::Nothing
+    update!(self::Blake3Ctx, input::AbstractVector{UInt8}, datalen=length(input))::Nothing
 
 Hash more data.  This method can be called multiple times until all the data has been
 hashed.
 """
-function update!(self::Hasher, input::AbstractVector{UInt8}, datalen=length(input))::Nothing
+function update!(self::Blake3Ctx, input::AbstractVector{UInt8}, datalen=length(input))::Nothing
     local data = view(input, 1:datalen)
 
     while isempty(data) == false
@@ -359,7 +359,7 @@ function update!(self::Hasher, input::AbstractVector{UInt8}, datalen=length(inpu
 end
 
 """
-    digest(self::Hasher, out_slice::AbstractArray{UInt8})::Nothing
+    digest(self::Blake3Ctx, out_slice::AbstractArray{UInt8})::Nothing
 
 Generate the hash and write it to the provided array.  The contents of out_slice will be
 overwritten.
@@ -369,7 +369,7 @@ __Details:__
 Normally you would pass in an array of 32 bytes which the method will fill with the hash.
 However if you want more (or less) bytes you can pass in a an array of a different size.
 """
-function digest(self::Hasher, out_slice::AbstractArray{UInt8})::Nothing
+function digest(self::Blake3Ctx, out_slice::AbstractArray{UInt8})::Nothing
     # Starting with the Output from the current chunk, compute all the
     # parent chaining values along the right edge of the tree, until we
     # have the root Output.
@@ -389,7 +389,7 @@ function digest(self::Hasher, out_slice::AbstractArray{UInt8})::Nothing
 end
 
 """
-    digest(self::Hasher, bytes=32)::Vector{UInt8}
+    digest(self::Blake3Ctx, bytes=32)::Vector{UInt8}
 
 Generate the hash and return it.
 
@@ -398,7 +398,7 @@ __Details:__
 Normally you would want 32 bytes back (256bits) but you can have it return more or less
 bytes based on your need.
 """
-function digest(self::Hasher, bytes=32)::Vector{UInt8}
+function digest(self::Blake3Ctx, bytes=32)::Vector{UInt8}
     local output = Vector{UInt8}(undef, bytes)
     digest(self, output)
     return output

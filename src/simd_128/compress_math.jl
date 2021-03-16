@@ -19,43 +19,22 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-using Test
-using JSON
-using Base.Iterators
-
-const DATA    = JSON.parsefile("$(@__DIR__)/test_vectors.json")
-const KEY     = Vector{UInt8}(DATA["key"])
-const CONTEXT = DATA["context_string"]
-const CASES   = DATA["cases"]
-
-struct Case
-    input::Vector{UInt8}
-    hash::Vector{UInt8}
-    keyed::Vector{UInt8}
-    derive::Vector{UInt8}
-    Case(case::Dict{String, Any}) = new(
-        [x for x = take(cycle(UInt8(0):UInt8(250)), case["input_len"]) ],
-        hex2bytes(case["hash"]),
-        hex2bytes(case["keyed_hash"]),
-        hex2bytes(case["derive_key"])
-    )
+@inline function rot16(x::VECTOR)::VECTOR
+    x = reinterpret(Vec{8, UInt16}, x)
+    r = shufflevector(x, Val((1, 0, 3, 2, 5, 4, 7, 6)))
+    return reinterpret(VECTOR, r)
 end
 
-include("stress.jl")
-
-@testset "SIMD128 Implmentation" begin
-    include("test_simd_128.jl")
+@inline function rot12(x::VECTOR)::VECTOR
+    return (x >> 12) ⊻ (x << 20)
 end
 
-@testset "StaticArrays Implmentation" begin
-    include("test_w_static_arrays.jl")
+@inline function rot8(x::VECTOR)::VECTOR
+    x = reinterpret(Vec{16, UInt8}, x)
+    r = shufflevector(x, Val((1, 2, 3, 0, 5, 6, 7, 4, 9, 10, 11, 8, 13, 14, 15, 12)))
+    return reinterpret(VECTOR, r)
 end
 
-@testset "Reference Implmentation" begin
-    include("test_ref.jl")
-end
-
-@testset "Default Usage" begin
-    include("test_default.jl")
+@inline function rot7(x::VECTOR)::VECTOR
+    return (x >> 7) ⊻ (x << 25)
 end
